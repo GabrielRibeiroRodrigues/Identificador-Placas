@@ -1,10 +1,10 @@
-# Sistema de Identificação de Placas
+## Sistema de Identificação de Placas
 
-Descrição do Projeto
+# Descrição do Projeto
 
 Este projeto tem como objetivo a identificação de placas de veículos a partir de imagens e vídeos utilizando o modelo YOLOv8 para detecção dos veículos e o EasyOCR para reconhecimento de texto nas placas. Ele permite a extração e validação de números de placas, que são comparados com uma base de dados para identificar proprietários e características do veículo.
 
-Funcionalidades
+# Funcionalidades
 
 Detecção de veículos e placas em imagens e vídeos.
 
@@ -18,7 +18,7 @@ Armazenamento e verificação de placas identificadas em um banco de dados.
 
 Exportação dos resultados em formato CSV.
 
-Tecnologias Utilizadas
+# Tecnologias Utilizadas
 
 Python - Linguagem principal do projeto.
 
