@@ -18,7 +18,7 @@ Armazenamento e verificação de placas identificadas em um banco de dados.
 
 Exportação dos resultados em formato CSV.
 
-# Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 Python - Linguagem principal do projeto.
 
