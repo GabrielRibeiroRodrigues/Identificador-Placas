@@ -3,9 +3,10 @@ import easyocr
 import pandas as pd
 import psycopg2
 import cv2  # adicionado para exibir imagens
+from datetime import datetime  # adicionado para data/hora
 
 conexao = psycopg2.connect(
-    dbname="pci_transito",
+    dbname="pci-dev",
     user="postgres",
     password="123456",
     host="localhost",
@@ -162,13 +163,20 @@ def verificar_camera(porta, cursor):
     except Exception as e:
         print(f"Erro ao verificar camera no banco de dados: {e}")
         return None
-def salvar_no_postgres(frame_nmr, car_id, license_number, license_number_score):
+
+def get_data_hora_atual():
+    """
+    Retorna a data e hora atual do PC no formato string 'YYYY-MM-DD HH:MM:SS'
+    """
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+def salvar_no_postgres(frame_nmr, car_id, license_number, license_number_score, data_leitura):
     try:
         comando_sql = """
-        INSERT INTO transito_leitura_placa (frame_nmr,car_id,license_number,license_number_score)
-        VALUES (%s, %s, %s,%s);
+        INSERT INTO transito_leitura_placa (frame_nmr,car_id,license_number,license_number_score,data_leitura)
+        VALUES (%s, %s, %s,%s, %s);
         """
-        valores = (int(frame_nmr), int(car_id), license_number, float(license_number_score))
+        valores = (int(frame_nmr), int(car_id), license_number, float(license_number_score), data_leitura)
         cursor.execute(comando_sql, valores)
         conexao.commit()
     except Exception as e:

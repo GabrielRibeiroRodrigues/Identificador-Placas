@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import cv2
 import numpy as np 
 from sort.sort import Sort
-from util import ler_carro, ler_placas, verificar_camera, salvar_no_postgres, salvar_registro_frequencia, verificar_placa_registrada
+from util import ler_carro, ler_placas, verificar_camera, salvar_no_postgres, salvar_registro_frequencia, verificar_placa_registrada, get_data_hora_atual
 import psycopg2
 from datetime import datetime
 import os
@@ -12,12 +12,14 @@ mot_tracker = Sort(max_age=30, min_hits=3, iou_threshold=0.3)
 
 
 conexao = psycopg2.connect(
-    dbname="pci_transito",
+    dbname="pci-dev",
     user="postgres",
     password="123456",
     host="localhost",
     port="5432"
 )
+
+
 
 cursor = conexao.cursor()
 
@@ -31,8 +33,8 @@ barra_verm = vermelho + "━" * tamanho + reset
 
 
 detector_carro = YOLO('yolov8n.pt')
-detector_placa = YOLO("C:\\Users\\Pichau\\Desktop\\best (4).pt")
-cap = cv2.VideoCapture("C:\\Users\\Pichau\\Desktop\\Projeto\\ffff.mp4")
+detector_placa = YOLO("C:\\Users\\12265587630\\Desktop\\best (4).pt")
+cap = cv2.VideoCapture("C:\\Users\\12265587630\\Desktop\\fff.mp4")
 # cap = cv2.VideoCapture("rtsp://admin:123456789abc@192.168.0.2:554/cam/realmonitor?channel=1&subtype=0")
 porta = 3
 veiculos = [2, 3, 5, 7]  
@@ -45,9 +47,6 @@ frame_anterior = -8
 
 
 while ret:
-    data_e_hora_atuais = datetime.now()
-    data_e_hora_em_texto = data_e_hora_atuais.strftime('%Y-%m-%d %H:%M:%S')
-
     for i in range(intervalo_frames):
         frame_nmr += 1
         ret, frame = cap.read()
@@ -96,11 +95,10 @@ while ret:
                 # Ler o texto da placa
                 texto_detectado, confianca_texto_detectado = ler_placas(placa_carro_crop_thresh)
 
-               
-
                 #Salvando os registros no banco de dados
                 if texto_detectado is not None and confianca_texto_detectado > confianca_gravar_texto:
-                    salvar_no_postgres(frame_nmr, car_id, texto_detectado, confianca_texto_detectado)
+                    data_leitura = get_data_hora_atual()
+                    salvar_no_postgres(frame_nmr, car_id, texto_detectado, confianca_texto_detectado, data_leitura)
                     
                     # Verificar se a placa já está registrada
                     info = verificar_placa_registrada(texto_detectado, cursor)
@@ -109,7 +107,7 @@ while ret:
                     tipo = verificar_camera(porta,cursor)
                     if info:
                         if frame_nmr not in range(frame_anterior + 1, frame_anterior + 10):
-                            salvar_registro_frequencia(info['id_veiculo'],data_e_hora_em_texto,tipo)
+                            salvar_registro_frequencia(info['id_veiculo'],data_leitura,tipo)
                             print(f"Proprietário: {info['proprietario']}, Placa: {info['placa']}, Cor do Veículo: {info['cor']}, Marca: {info['marca_id']}, ID_veiculo {info['id_veiculo']}") 
                             print(barra)    
                         else:
